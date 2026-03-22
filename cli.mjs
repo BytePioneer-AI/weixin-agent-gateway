@@ -16,6 +16,10 @@ const ENABLE_OFFICIAL_PLUGIN_CMD = "openclaw config set plugins.entries.openclaw
 const AGENTAPI_VERSION = process.env.AGENTAPI_VERSION?.trim() || "latest";
 const DEFAULT_CODEX_AGENTAPI_URL = "http://127.0.0.1:3284";
 const DEFAULT_CLAUDE_AGENTAPI_URL = "http://127.0.0.1:3285";
+const DEFAULT_OPENCODE_AGENTAPI_URL = "http://127.0.0.1:3286";
+const DEFAULT_COPILOT_AGENTAPI_URL = "http://127.0.0.1:3287";
+const DEFAULT_AUGGIE_AGENTAPI_URL = "http://127.0.0.1:3288";
+const DEFAULT_CURSOR_AGENTAPI_URL = "http://127.0.0.1:3289";
 
 function log(msg) {
   console.log(`\x1b[36m[weixin-agent-gateway]\x1b[0m ${msg}`);
@@ -239,18 +243,30 @@ function printNextSteps(agentapiInfo) {
   console.log("1. 直接在微信里切换后端");
   console.log("   /codex");
   console.log("   /claude");
+  console.log("   /opencode");
+  console.log("   /copilot");
+  console.log("   /auggie");
+  console.log("   /cursor");
   console.log("   /openclaw");
   console.log();
-  console.log("   默认会连接本地 AgentAPI：Codex 3284，Claude 3285；没拉起时会自动尝试启动。");
-  console.log("   前提是本机 `agentapi`、`codex`、`claude` 命令可用且已登录。");
+  console.log("   默认会连接本地 AgentAPI：Codex 3284，Claude 3285，Opencode 3286，Copilot 3287，Auggie 3288，Cursor 3289；没拉起时会自动尝试启动。");
+  console.log("   前提是本机 `agentapi` 和对应 CLI 命令可用且已登录。");
   console.log();
   console.log("2. 只有在你需要改远端地址或非默认端口时，才设置环境变量");
   if (isWindows()) {
     console.log(`   $env:WEIXIN_CODEX_AGENTAPI_URL=\"${DEFAULT_CODEX_AGENTAPI_URL}\"`);
     console.log(`   $env:WEIXIN_CLAUDE_AGENTAPI_URL=\"${DEFAULT_CLAUDE_AGENTAPI_URL}\"`);
+    console.log(`   $env:WEIXIN_OPENCODE_AGENTAPI_URL=\"${DEFAULT_OPENCODE_AGENTAPI_URL}\"`);
+    console.log(`   $env:WEIXIN_COPILOT_AGENTAPI_URL=\"${DEFAULT_COPILOT_AGENTAPI_URL}\"`);
+    console.log(`   $env:WEIXIN_AUGGIE_AGENTAPI_URL=\"${DEFAULT_AUGGIE_AGENTAPI_URL}\"`);
+    console.log(`   $env:WEIXIN_CURSOR_AGENTAPI_URL=\"${DEFAULT_CURSOR_AGENTAPI_URL}\"`);
   } else {
     console.log(`   export WEIXIN_CODEX_AGENTAPI_URL=\"${DEFAULT_CODEX_AGENTAPI_URL}\"`);
     console.log(`   export WEIXIN_CLAUDE_AGENTAPI_URL=\"${DEFAULT_CLAUDE_AGENTAPI_URL}\"`);
+    console.log(`   export WEIXIN_OPENCODE_AGENTAPI_URL=\"${DEFAULT_OPENCODE_AGENTAPI_URL}\"`);
+    console.log(`   export WEIXIN_COPILOT_AGENTAPI_URL=\"${DEFAULT_COPILOT_AGENTAPI_URL}\"`);
+    console.log(`   export WEIXIN_AUGGIE_AGENTAPI_URL=\"${DEFAULT_AUGGIE_AGENTAPI_URL}\"`);
+    console.log(`   export WEIXIN_CURSOR_AGENTAPI_URL=\"${DEFAULT_CURSOR_AGENTAPI_URL}\"`);
   }
   console.log();
 }

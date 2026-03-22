@@ -1,6 +1,6 @@
 # 微信多后端接入插件
 
-> 本项目目前仍处于早期版本，体验上可能还有一些问题。后续会持续迭代和优化，提供更顺畅的微信接入 Codex、Claude Code 等能力。
+> 本项目目前仍处于早期版本，体验上可能还有一些问题。后续会持续迭代和优化，提供更顺畅的微信接入 Codex、Claude Code、Opencode、GitHub Copilot、Auggie、Cursor CLI 等能力。
 >
 > 当前问题：Codex、Claude Code 在输出内容时，可能存在排版较乱的情况，后续会优化处理。
 
@@ -11,6 +11,10 @@
 - `openclaw`
 - `codex`
 - `claude`
+- `opencode`
+- `copilot`
+- `auggie`
+- `cursor`
 
 ### 样例展示
 
@@ -23,7 +27,7 @@
 
 目前它还不是一个完全脱离 OpenClaw 的独立服务，但在切换后端时已经不再依赖 OpenClaw，也不会消耗 OpenClaw Token。
 
-后续将逐步实现脱离 OpenClaw 的独立运行，并在微信侧接入 OpenClaw、Codex、Claude Code、OpenCode 等更多后端。
+后续将逐步实现脱离 OpenClaw 的独立运行，并继续完善 OpenClaw、Codex、Claude Code、Opencode、GitHub Copilot、Auggie、Cursor CLI 等后端的接入体验。
 
 当前运行方式：
 
@@ -31,7 +35,7 @@
 微信
   -> weixin-agent-gateway 插件
   -> 路由层
-  -> openclaw / codex / claude
+  -> openclaw / codex / claude / opencode / copilot / auggie / cursor
 ```
 
 
@@ -44,21 +48,26 @@
 - [ ] 支持更多编程工具后端
 - [ ] 连续输出的形式显示思考过程
 
-
-
-
-
 ## 安装插件
 
 需要本机已经安装 OpenClaw，并且 `openclaw` 命令可用。
 
-如果你要使用 `codex` / `claude`：
+如果你要使用 `codex` / `claude` / `opencode` / `copilot` / `auggie` / `cursor`：
 
 - 安装器会自动安装 `agentapi`（如果本机缺失）
 - 插件会优先按本地默认地址自动探测并尝试拉起 AgentAPI
-- 但 `codex` / `claude` 本身仍需要先登录可用
+- 但对应 CLI 本身仍需要先安装并登录可用
 
 AgentAPI 只是远程控制层，不负责登录。
+
+当前默认本地地址：
+
+- `codex`: `http://127.0.0.1:3284`
+- `claude`: `http://127.0.0.1:3285`
+- `opencode`: `http://127.0.0.1:3286`
+- `copilot`: `http://127.0.0.1:3287`
+- `auggie`: `http://127.0.0.1:3288`
+- `cursor`: `http://127.0.0.1:3289`
 
 ### 一键安装
 
@@ -103,46 +112,6 @@ openclaw channels login --channel weixin-agent-gateway
 openclaw gateway restart
 ```
 
-## 发布 npm
-
-当前仓库现在只发布一个 npm 包：
-
-- `@bytepioneer-ai/weixin-agent-gateway`
-
-这个包同时包含：
-
-- OpenClaw 插件本体
-- 安装 / 初始化 CLI
-
-发布前先执行：
-
-```bash
-npm login
-```
-
-根目录已经提供统一发布脚本：
-
-```bash
-npm run publish:npm:dry-run
-npm run publish:npm
-```
-
-默认会发布根包，并使用 public access。
-
-发布脚本默认会附带 `--ignore-scripts`。
-
-如果需要带 tag 或 OTP，可以直接调用脚本：
-
-```bash
-node ./scripts/publish-npm.mjs --tag next --otp 123456
-```
-
-如果你需要显式执行 npm lifecycle scripts，可以追加：
-
-```bash
-node ./scripts/publish-npm.mjs --with-scripts
-```
-
 ## 使用方法
 
 ### 切换后端
@@ -153,12 +122,22 @@ node ./scripts/publish-npm.mjs --with-scripts
 /openclaw
 /codex
 /claude
+/opencode
+/copilot
+/auggie
+/cursor
 ```
 
 也可以查看当前后端：
 
 ```text
 /backend
+/backend codex
+/backend claude
+/backend opencode
+/backend copilot
+/backend auggie
+/backend cursor
 ```
 
 ## 鸣谢

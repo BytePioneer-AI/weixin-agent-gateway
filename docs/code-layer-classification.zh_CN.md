@@ -141,7 +141,7 @@
 
 ### 当前状态
 
-目前后端层已经建立了结构，但只接入了 `openclaw`。
+目前后端层已经建立了结构，已接入 `openclaw` 以及多种 `lightweight` backend。
 
 [src/backends/openclaw/adapter.ts](/d:/work/code/openclaw-weixin/src/backends/openclaw/adapter.ts)
 - 现在只封装了 OpenClaw 的最终 dispatch
@@ -284,6 +284,10 @@ src/
       reply-dispatch.ts
     codex/
     claude/
+    opencode/
+    copilot/
+    auggie/
+    cursor/
   host/
     openclaw/
       plugin-entry.ts
@@ -328,7 +332,7 @@ src/
 
 再加上一批尚未拆开的混合层。
 
-如果后续目标是“微信入口 + OpenClaw/Codex/Claude 平级后端”，那么重构方向应该是：
+如果后续目标是“微信入口 + OpenClaw/Codex/Claude/Opencode/Copilot/Auggie/Cursor 平级后端”，那么重构方向应该是：
 
 - 保留并沉淀公共接入层
 - 持续把 OpenClaw-specific 逻辑抽进 `src/backends/openclaw/`

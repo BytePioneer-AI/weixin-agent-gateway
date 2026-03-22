@@ -16,7 +16,7 @@
 - `lightweight`
   轻量 backend，只需要处理文本和图片输入，返回文本和媒体输出
 
-`codex`、`claude code` 这类后端，建议按 `lightweight` 模式接入。
+`codex`、`claude code`、`opencode`、`github copilot`、`auggie`、`cursor cli` 这类后端，建议按 `lightweight` 模式接入。
 
 ## 2. 当前主链路
 
@@ -180,12 +180,12 @@ const backendAdapters = {
 
 - [../messaging/slash-commands.ts](/d:/work/code/openclaw-weixin/src/messaging/slash-commands.ts)
 
-当前 `/codex` 和 `/claude` 还是“尚未接入”的提示。  
-接入完成后，需要把它们改成真正设置 backend selection。
+当前 `/codex`、`/claude`、`/opencode`、`/copilot`、`/auggie`、`/cursor` 都已经可以切换会话 backend。  
+新增 backend 时，需要同步补齐对应的 slash command 或 `/backend <name>` 切换入口。
 
 ## 6. 轻量 backend 实际会用到哪些函数
 
-对于 `codex` / `claude code` 这类轻量 backend，真正需要关心的函数很少。
+对于 `codex` / `claude code` / `opencode` / `github copilot` / `auggie` / `cursor cli` 这类轻量 backend，真正需要关心的函数很少。
 
 ### 必须理解的函数 / 类型
 
@@ -347,7 +347,7 @@ export const demoBackendAdapter: WeixinBackendAdapter = {
 
 ## 12. 当前建议
 
-对于 `codex` / `claude code`，建议采用下面的接入策略：
+对于 `codex` / `claude code` / `opencode` / `github copilot` / `auggie` / `cursor cli`，建议采用下面的接入策略：
 
 - 实现 `mode: "lightweight"` adapter
 - 只消费：

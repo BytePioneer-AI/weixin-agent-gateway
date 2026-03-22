@@ -7,7 +7,21 @@ import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(SCRIPT_DIR, "..");
-const NPM_CMD = process.platform === "win32" ? "npm.cmd" : "npm";
+
+function resolveNpmInvocation(args) {
+  if (process.platform === "win32") {
+    return {
+      command: "cmd.exe",
+      args: ["/d", "/s", "/c", "npm", ...args],
+      display: `npm ${args.join(" ")}`,
+    };
+  }
+  return {
+    command: "npm",
+    args,
+    display: `npm ${args.join(" ")}`,
+  };
+}
 
 function printUsage() {
   console.log(`
@@ -30,7 +44,8 @@ function readPackageJson(dir) {
 }
 
 function runNpm(args, options = {}) {
-  const result = spawnSync(NPM_CMD, args, {
+  const invocation = resolveNpmInvocation(args);
+  const result = spawnSync(invocation.command, invocation.args, {
     cwd: options.cwd ?? ROOT_DIR,
     stdio: options.capture ? ["ignore", "pipe", "pipe"] : "inherit",
     encoding: "utf8",
@@ -43,7 +58,7 @@ function runNpm(args, options = {}) {
   if (result.status !== 0 && !options.allowFailure) {
     const stderr = (result.stderr || "").trim();
     throw new Error(
-      `npm ${args.join(" ")} failed in ${options.cwd ?? ROOT_DIR}${stderr ? `: ${stderr}` : ""}`,
+      `${invocation.display} failed in ${options.cwd ?? ROOT_DIR}${stderr ? `: ${stderr}` : ""}`,
     );
   }
 
@@ -192,7 +207,7 @@ function publishOne(options) {
   }
 
   const publishArgs = buildPublishArgs(options);
-  console.log(`command: ${NPM_CMD} ${publishArgs.join(" ")}`);
+  console.log(`command: ${resolveNpmInvocation(publishArgs).display}`);
   runNpm(publishArgs, { cwd: ROOT_DIR });
 }
 

@@ -5,10 +5,20 @@ import { spawn, spawnSync } from "node:child_process";
 
 import { logger } from "../../util/logger.js";
 
-export type AgentApiAutoStartBackendId = "codex" | "claude";
+export type AgentApiAutoStartBackendId =
+  | "codex"
+  | "claude"
+  | "opencode"
+  | "copilot"
+  | "auggie"
+  | "cursor";
 
 export const DEFAULT_CODEX_AGENTAPI_URL = "http://127.0.0.1:3284";
 export const DEFAULT_CLAUDE_AGENTAPI_URL = "http://127.0.0.1:3285";
+export const DEFAULT_OPENCODE_AGENTAPI_URL = "http://127.0.0.1:3286";
+export const DEFAULT_COPILOT_AGENTAPI_URL = "http://127.0.0.1:3287";
+export const DEFAULT_AUGGIE_AGENTAPI_URL = "http://127.0.0.1:3288";
+export const DEFAULT_CURSOR_AGENTAPI_URL = "http://127.0.0.1:3289";
 
 type EnsureAgentApiRunningOptions = {
   backendId: AgentApiAutoStartBackendId;
@@ -76,7 +86,20 @@ function resolveUserBinCommandPath(command: string): string | undefined {
 }
 
 function resolveDefaultPort(backendId: AgentApiAutoStartBackendId): number {
-  return backendId === "codex" ? 3284 : 3285;
+  switch (backendId) {
+    case "codex":
+      return 3284;
+    case "claude":
+      return 3285;
+    case "opencode":
+      return 3286;
+    case "copilot":
+      return 3287;
+    case "auggie":
+      return 3288;
+    case "cursor":
+      return 3289;
+  }
 }
 
 function resolvePort(url: URL, backendId: AgentApiAutoStartBackendId): number {
@@ -135,10 +158,37 @@ function resolveAgentApiExecutable(): string | undefined {
 }
 
 function resolveAgentCommand(backendId: AgentApiAutoStartBackendId): string {
-  if (backendId === "codex") {
-    return process.env.WEIXIN_CODEX_BIN?.trim() || process.env.CODEX_BIN?.trim() || "codex";
+  switch (backendId) {
+    case "codex":
+      return process.env.WEIXIN_CODEX_BIN?.trim() || process.env.CODEX_BIN?.trim() || "codex";
+    case "claude":
+      return process.env.WEIXIN_CLAUDE_BIN?.trim() || process.env.CLAUDE_BIN?.trim() || "claude";
+    case "opencode":
+      return process.env.WEIXIN_OPENCODE_BIN?.trim() || process.env.OPENCODE_BIN?.trim() || "opencode";
+    case "copilot":
+      return process.env.WEIXIN_COPILOT_BIN?.trim() || process.env.COPILOT_BIN?.trim() || "copilot";
+    case "auggie":
+      return process.env.WEIXIN_AUGGIE_BIN?.trim() || process.env.AUGGIE_BIN?.trim() || "auggie";
+    case "cursor":
+      return process.env.WEIXIN_CURSOR_BIN?.trim() || process.env.CURSOR_BIN?.trim() || "cursor-agent";
   }
-  return process.env.WEIXIN_CLAUDE_BIN?.trim() || process.env.CLAUDE_BIN?.trim() || "claude";
+}
+
+function resolveBackendLabel(backendId: AgentApiAutoStartBackendId): string {
+  switch (backendId) {
+    case "codex":
+      return "Codex";
+    case "claude":
+      return "Claude Code";
+    case "opencode":
+      return "Opencode";
+    case "copilot":
+      return "GitHub Copilot";
+    case "auggie":
+      return "Auggie";
+    case "cursor":
+      return "Cursor CLI";
+  }
 }
 
 function assertAgentCommandAvailable(
@@ -146,10 +196,22 @@ function assertAgentCommandAvailable(
   agentCommand: string,
 ): void {
   if (commandExists(agentCommand)) return;
-  const backendLabel = backendId === "codex" ? "Codex" : "Claude Code";
   throw new Error(
-    `${backendLabel} AgentAPI auto-start failed: executable "${agentCommand}" was not found.`,
+    `${resolveBackendLabel(backendId)} AgentAPI auto-start failed: executable "${agentCommand}" was not found.`,
   );
+}
+
+function resolveAgentApiType(backendId: AgentApiAutoStartBackendId): string | undefined {
+  switch (backendId) {
+    case "codex":
+    case "opencode":
+    case "copilot":
+    case "auggie":
+    case "cursor":
+      return backendId;
+    case "claude":
+      return undefined;
+  }
 }
 
 function buildLaunchArgs(
@@ -158,8 +220,9 @@ function buildLaunchArgs(
   agentCommand: string,
 ): string[] {
   const args = ["server", "--port", String(port)];
-  if (backendId === "codex") {
-    args.push("--type=codex");
+  const agentType = resolveAgentApiType(backendId);
+  if (agentType) {
+    args.push(`--type=${agentType}`);
   }
   args.push("--", agentCommand);
   return args;

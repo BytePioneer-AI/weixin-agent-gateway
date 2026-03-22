@@ -1,5 +1,9 @@
 import path from "node:path";
 
+import {
+  WEIXIN_BACKEND_LABELS,
+  isWeixinBackendId,
+} from "../../../backends/contracts.js";
 import { downloadRemoteImageToTemp } from "../../../cdn/upload.js";
 import { sendWeixinMediaFile } from "../../../messaging/send-media.js";
 import { markdownToPlainText, sendMessageWeixin } from "../../../messaging/send.js";
@@ -126,16 +130,16 @@ export function createWeixinReplyErrorHandler(params: {
       logger.warn(`onError: contextToken missing, cannot send error notice to=${params.to}`);
       return;
     }
+    const isKnownBackend = isWeixinBackendId(info.kind);
     if (
-      info.kind === "codex" ||
-      info.kind === "claude" ||
+      (isKnownBackend && info.kind !== "openclaw") ||
       lowerErrMsg.includes("agentapi") ||
       lowerErrMsg.includes("get /status") ||
       lowerErrMsg.includes("get /messages") ||
       lowerErrMsg.includes("post /message") ||
       lowerErrMsg.includes("post /upload")
     ) {
-      const backendLabel = info.kind === "codex" ? "Codex" : info.kind === "claude" ? "Claude Code" : "Agent";
+      const backendLabel = isKnownBackend ? WEIXIN_BACKEND_LABELS[info.kind] : "Agent";
       notice = `⚠️ ${backendLabel} 后端连接失败，请检查 agentapi 和对应命令是否可用，或 AgentAPI 地址配置是否正确。`;
     } else if (errMsg.includes("remote media download failed") || errMsg.includes("fetch")) {
       notice = "⚠️ 媒体文件下载失败，请检查链接是否可访问。";

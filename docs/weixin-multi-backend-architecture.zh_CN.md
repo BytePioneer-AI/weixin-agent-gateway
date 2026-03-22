@@ -10,7 +10,7 @@
 这对“微信 -> OpenClaw”场景是合适的，但不适合下面这种目标架构：
 
 - 微信只是入口
-- OpenClaw、Codex、Claude Code 是平级后端
+- OpenClaw、Codex、Claude Code、Opencode、GitHub Copilot、Auggie、Cursor CLI 是平级后端
 - 上层统一做会话路由、命令切换、权限和状态管理
 
 本设计的核心结论是：
@@ -22,8 +22,8 @@
 ## 2. 目标
 
 - 将“微信接入层”与“AI 后端层”解耦
-- 让 OpenClaw、Codex、Claude Code 成为平级后端
-- 支持通过命令切换当前会话后端，例如 `/openclaw`、`/codex`、`/claude`
+- 让 OpenClaw、Codex、Claude Code、Opencode、GitHub Copilot、Auggie、Cursor CLI 成为平级后端
+- 支持通过命令切换当前会话后端，例如 `/openclaw`、`/codex`、`/claude`、`/opencode`、`/copilot`、`/auggie`、`/cursor`
 - 最大化复用官方 `openclaw-weixin` 的 transport 实现
 - 将未来跟进官方更新的成本限制在微信 transport 层
 
@@ -99,7 +99,7 @@
 原因不是代码风格，而是架构目标决定的：
 
 - 微信接入层的职责是连接微信，只关心登录、轮询、发送、媒体和 `context_token`
-- 后端对接层的职责是连接 OpenClaw、Codex、Claude Code，只关心路由、会话状态和后端调用
+- 后端对接层的职责是连接 OpenClaw、Codex、Claude Code、Opencode、GitHub Copilot、Auggie、Cursor CLI，只关心路由、会话状态和后端调用
 - 如果两者不拆开，微信入口就会被某一个后端实现绑死
 - 一旦未来新增后端，或者替换 OpenClaw 的接入方式，改动会扩散到微信 transport 核心
 - 与官方微信插件同步时，也会因为混入业务逻辑导致同步成本急剧上升
@@ -143,7 +143,7 @@ Weixin
 
 - 微信 transport 只负责接入微信
 - Session Router 只负责会话选择和命令切换
-- OpenClaw、Codex、Claude Code 都只是平级 backend
+- OpenClaw、Codex、Claude Code、Opencode、GitHub Copilot、Auggie、Cursor CLI 都只是平级 backend
 - 后续新增 backend 不需要改微信 transport
 
 ### 5.3 拆分边界
@@ -159,7 +159,7 @@ Weixin
 
 应归入“后端对接层”的能力：
 
-- `/openclaw`、`/codex`、`/claude` 命令解析
+- `/openclaw`、`/codex`、`/claude`、`/opencode`、`/copilot`、`/auggie`、`/cursor` 命令解析
 - 当前会话 backend 选择
 - OpenClaw / Codex / Claude Code 适配
 - 长任务状态管理
@@ -323,6 +323,18 @@ src/
     claude/
       adapter.ts
       client.ts
+    opencode/
+      adapter.ts
+      client.ts
+    copilot/
+      adapter.ts
+      client.ts
+    auggie/
+      adapter.ts
+      client.ts
+    cursor/
+      adapter.ts
+      client.ts
   state/
     kv.ts
     sessions.ts
@@ -358,7 +370,7 @@ type BackendSelection = {
   channel: "weixin";
   accountId: string;
   peerId: string;
-  backend: "openclaw" | "codex" | "claude";
+  backend: "openclaw" | "codex" | "claude" | "opencode" | "copilot" | "auggie" | "cursor";
   updatedAt: number;
 };
 ```
@@ -404,7 +416,7 @@ Transport -> Weixin: sendmessage
 ### 10.3 命令切换时序
 
 ```text
-User -> Weixin: /codex
+User -> Weixin: /codex（或 /claude /opencode /copilot /auggie /cursor）
 Weixin -> Transport: inbound update
 Transport -> Router: command envelope
 Router -> State Store: set backend = codex
@@ -542,10 +554,10 @@ Transport -> Weixin: sendmessage
 - 验证 transport 与 router 边界
 - 验证 `context_token` 生命周期
 
-### Phase 3：接 Codex / Claude
+### Phase 3：接 Codex / Claude / Opencode / Copilot / Auggie / Cursor
 
 - 通过 service adapter 接入
-- 加上 `/codex`、`/claude`、`/openclaw`
+- 加上 `/codex`、`/claude`、`/opencode`、`/copilot`、`/auggie`、`/cursor`、`/openclaw`
 - 实现按会话切换
 
 ### Phase 4：增强运维能力
@@ -562,7 +574,7 @@ Transport -> Weixin: sendmessage
 - 把官方 `openclaw-weixin` 视为“微信 transport 上游实现”
 - 不把它继续作为 OpenClaw 插件成品直接运行
 - 抽取 transport 内核，建立你们自己的微信网关
-- 在上层路由 OpenClaw、Codex、Claude Code 三个平级后端
+- 在上层路由 OpenClaw、Codex、Claude Code、Opencode、GitHub Copilot、Auggie、Cursor CLI 这些平级后端
 
 这个方案的优点是：
 
