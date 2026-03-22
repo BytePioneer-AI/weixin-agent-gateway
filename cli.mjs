@@ -6,8 +6,9 @@ import path from "node:path";
 import { chmodSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
-const PLUGIN_SPEC =
-  process.env.WEIXIN_GATEWAY_PLUGIN_SPEC?.trim() || "@bytepioneer-ai/weixin-agent-gateway";
+const PACKAGE_NAME = "@bytepioneer-ai/weixin-agent-gateway";
+const INSTALLER_USER_AGENT = "weixin-agent-gateway-installer";
+const PLUGIN_SPEC = process.env.WEIXIN_GATEWAY_PLUGIN_SPEC?.trim() || PACKAGE_NAME;
 const CHANNEL_ID = process.env.WEIXIN_GATEWAY_CHANNEL_ID?.trim() || "weixin-agent-gateway";
 const PLUGIN_ENTRY_ID = process.env.WEIXIN_GATEWAY_PLUGIN_ID?.trim() || "weixin-agent-gateway";
 const OFFICIAL_PLUGIN_ENTRY_ID = "openclaw-weixin";
@@ -95,7 +96,7 @@ function resolveUserBinDir() {
 
 async function downloadToFile(url, filePath) {
   const res = await fetch(url, {
-    headers: { "User-Agent": "weixin-agent-gateway-cli/0.1.0" },
+    headers: { "User-Agent": INSTALLER_USER_AGENT },
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -220,7 +221,7 @@ function loginWeixin() {
 function restartGateway() {
   log("正在重启 OpenClaw Gateway...");
   try {
-    run(`openclaw gateway restart`, { silent: false });
+    run("openclaw gateway restart", { silent: false });
   } catch {
     warn("Gateway 重启失败，可手动执行：");
     console.log("  openclaw gateway restart");
@@ -267,7 +268,7 @@ async function install() {
 
 function help() {
   console.log(`
-用法: npx -y @bytepioneer-ai/weixin-agent-gateway-cli <命令>
+用法: npx -y ${PACKAGE_NAME} <命令>
 
 命令:
   install   安装插件、启用插件、扫码登录，并安装 AgentAPI

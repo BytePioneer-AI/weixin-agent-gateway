@@ -4,7 +4,7 @@
 >
 > 当前问题：Codex、Claude Code 在输出内容时，可能存在排版较乱的情况，后续会优化处理。
 
-这是一个基于腾讯微信通道实现演进而来的项目。本项目的OpenClaw接入方案与腾讯官方保持一致，可放心使用。
+这是一个基于腾讯微信插件演进而来的项目，本项目的OpenClaw接入方案与腾讯官方保持一致。
 
 当前项目仍然以 **OpenClaw 微信插件** 形态运行，但已经开始支持“一个微信入口，对接多个后端”：
 
@@ -16,7 +16,7 @@
 
 | 样例 1 | 样例 2 |
 | --- | --- |
-| ![样例 1](docs/img/1.jpg) | ![样例 2](docs/img/2.jpg) |
+| <img src="docs/img/1.jpg" alt="样例 1" width="260" /> | <img src="docs/img/2.jpg" alt="样例 2" width="260" /> |
 
 
 ## 当前状态
@@ -63,13 +63,13 @@ AgentAPI 只是远程控制层，不负责登录。
 ### 一键安装
 
 ```bash
-npx -y @bytepioneer-ai/weixin-agent-gateway-cli install
+npx -y @bytepioneer-ai/weixin-agent-gateway install
 ```
 
 安装器会自动：
 
 - 安装或更新本插件
-- 尝试禁用官方 `openclaw-weixin` 插件（）
+- 尝试禁用官方 `openclaw-weixin` 插件
 - 启用本插件
 - 触发微信扫码登录
 - 下载 AgentAPI（如果本机未安装）
@@ -105,18 +105,14 @@ openclaw gateway restart
 
 ## 发布 npm
 
-当前仓库里有两个独立 npm 包：
+当前仓库现在只发布一个 npm 包：
 
 - `@bytepioneer-ai/weixin-agent-gateway`
-- `@bytepioneer-ai/weixin-agent-gateway-cli`
 
-它们可以放在同一个仓库里统一维护，但不建议合成一个包。
+这个包同时包含：
 
-原因是：
-
-- 本体是 OpenClaw 插件包
-- CLI 是安装和初始化工具
-- 两者职责不同，版本节奏也可能不同
+- OpenClaw 插件本体
+- 安装 / 初始化 CLI
 
 发布前先执行：
 
@@ -129,24 +125,22 @@ npm login
 ```bash
 npm run publish:npm:dry-run
 npm run publish:npm
-npm run publish:npm:plugin
-npm run publish:npm:cli
 ```
 
-默认会按 `plugin -> cli` 的顺序发布，并使用 public access。
+默认会发布根包，并使用 public access。
 
 发布脚本默认会附带 `--ignore-scripts`。
 
 如果需要带 tag 或 OTP，可以直接调用脚本：
 
 ```bash
-node ./scripts/publish-npm.mjs all --tag next --otp 123456
+node ./scripts/publish-npm.mjs --tag next --otp 123456
 ```
 
 如果你需要显式执行 npm lifecycle scripts，可以追加：
 
 ```bash
-node ./scripts/publish-npm.mjs all --with-scripts
+node ./scripts/publish-npm.mjs --with-scripts
 ```
 
 ## 使用方法
@@ -167,3 +161,7 @@ node ./scripts/publish-npm.mjs all --with-scripts
 /backend
 ```
 
+## 鸣谢
+
+- `@tencent-weixin/openclaw-weixin`，本项目由此改编而来。
+- [`coder/agentapi`](https://github.com/coder/agentapi)，本项目使用它来实现对多个 AI IDE 的控制。

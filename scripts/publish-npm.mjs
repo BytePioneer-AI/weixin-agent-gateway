@@ -9,21 +9,10 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(SCRIPT_DIR, "..");
 const NPM_CMD = process.platform === "win32" ? "npm.cmd" : "npm";
 
-const PACKAGE_TARGETS = {
-  plugin: {
-    label: "plugin",
-    dir: ROOT_DIR,
-  },
-  cli: {
-    label: "cli",
-    dir: path.join(ROOT_DIR, "installer-cli"),
-  },
-};
-
 function printUsage() {
   console.log(`
 Usage:
-  node scripts/publish-npm.mjs [all|plugin|cli] [options]
+  node scripts/publish-npm.mjs [options]
 
 Options:
   --dry-run           Only simulate publishing
@@ -94,7 +83,6 @@ function ensureLoggedIn() {
 
 function parseArgs(argv) {
   const options = {
-    target: "all",
     dryRun: false,
     tag: undefined,
     otp: undefined,
@@ -161,26 +149,10 @@ function parseArgs(argv) {
       continue;
     }
 
-    if (!arg.startsWith("--")) {
-      options.target = arg;
-      continue;
-    }
-
     throw new Error(`Unknown option: ${arg}`);
   }
 
-  if (!["all", "plugin", "cli"].includes(options.target)) {
-    throw new Error(`Unknown target: ${options.target}`);
-  }
-
   return options;
-}
-
-function resolvePublishTargets(target) {
-  if (target === "all") {
-    return [PACKAGE_TARGETS.plugin, PACKAGE_TARGETS.cli];
-  }
-  return [PACKAGE_TARGETS[target]];
 }
 
 function buildPublishArgs(options) {
@@ -200,14 +172,14 @@ function buildPublishArgs(options) {
   return args;
 }
 
-function publishOne(target, options) {
-  const pkg = readPackageJson(target.dir);
+function publishOne(options) {
+  const pkg = readPackageJson(ROOT_DIR);
   const publishedVersions = resolvePublishedVersions(pkg.name);
   const latestPublishedVersion =
     publishedVersions.length > 0 ? publishedVersions[publishedVersions.length - 1] : undefined;
 
-  console.log(`\n[${target.label}] ${pkg.name}@${pkg.version}`);
-  console.log(`directory: ${target.dir}`);
+  console.log(`\npackage: ${pkg.name}@${pkg.version}`);
+  console.log(`directory: ${ROOT_DIR}`);
 
   if (latestPublishedVersion) {
     console.log(`latest published: ${latestPublishedVersion}`);
@@ -221,13 +193,12 @@ function publishOne(target, options) {
 
   const publishArgs = buildPublishArgs(options);
   console.log(`command: ${NPM_CMD} ${publishArgs.join(" ")}`);
-  runNpm(publishArgs, { cwd: target.dir });
+  runNpm(publishArgs, { cwd: ROOT_DIR });
 }
 
 try {
   const options = parseArgs(process.argv.slice(2));
   const npmUser = ensureLoggedIn();
-  const targets = resolvePublishTargets(options.target);
 
   console.log(`npm user: ${npmUser}`);
   console.log(`mode: ${options.dryRun ? "dry-run" : "publish"}`);
@@ -235,9 +206,7 @@ try {
     console.log("lifecycle scripts: skipped by default (--ignore-scripts)");
   }
 
-  for (const target of targets) {
-    publishOne(target, options);
-  }
+  publishOne(options);
 
   console.log("\nPublish flow completed.");
 } catch (err) {
