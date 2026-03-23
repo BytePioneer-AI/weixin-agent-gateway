@@ -42,7 +42,9 @@ type AcpSubprocessClientOptions = {
   backendId: string;
   backendLabel: string;
   defaultCommand: string;
+  defaultArgs?: string[];
   commandEnvVarNames: string[];
+  argsEnvVarNames?: string[];
   cwdEnvVarNames: string[];
   permissionModeEnvVarNames: string[];
   missingCommandHint: string;
@@ -83,6 +85,68 @@ function readFirstEnv(names: string[]): string | undefined {
     if (value) return value;
   }
   return undefined;
+}
+
+export function parseCommandArgs(raw: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let quote: "'" | '"' | undefined;
+  let escapeNext = false;
+
+  for (const char of raw) {
+    if (escapeNext) {
+      current += char;
+      escapeNext = false;
+      continue;
+    }
+
+    if (quote) {
+      if (char === quote) {
+        quote = undefined;
+        continue;
+      }
+      if (char === "\\" && quote === '"') {
+        escapeNext = true;
+        continue;
+      }
+      current += char;
+      continue;
+    }
+
+    if (char === "'" || char === '"') {
+      quote = char;
+      continue;
+    }
+
+    if (/\s/.test(char)) {
+      if (current) {
+        args.push(current);
+        current = "";
+      }
+      continue;
+    }
+
+    if (char === "\\") {
+      current += char;
+      continue;
+    }
+
+    current += char;
+  }
+
+  if (escapeNext) {
+    current += "\\";
+  }
+  if (current) {
+    args.push(current);
+  }
+
+  return args;
+}
+
+function formatCommandForDisplay(command: string, args: string[]): string {
+  if (!args.length) return command;
+  return `${command} ${args.join(" ")}`;
 }
 
 function selectPermissionOption(options: PermissionOption[]): PermissionOption | undefined {
@@ -263,6 +327,12 @@ export class AcpSubprocessLightweightClient {
     return resolveCommandPath(raw) ?? raw;
   }
 
+  private resolveArgs(): string[] {
+    const raw = readFirstEnv(this.options.argsEnvVarNames ?? []);
+    if (raw) return parseCommandArgs(raw);
+    return [...(this.options.defaultArgs ?? [])];
+  }
+
   private assertCommandAvailable(command: string): void {
     if (resolveCommandPath(command)) return;
     throw new Error(
@@ -368,11 +438,14 @@ export class AcpSubprocessLightweightClient {
     if (!this.startupTask) {
       this.startupTask = (async () => {
         const command = this.resolveCommand();
+        const args = this.resolveArgs();
         const cwd = this.resolveCwd();
         this.assertCommandAvailable(command);
 
-        logger.info(`${this.options.backendId}-acp: initializing command=${command} cwd=${cwd}`);
-        const proc = spawn(command, [], {
+        logger.info(
+          `${this.options.backendId}-acp: initializing command=${formatCommandForDisplay(command, args)} cwd=${cwd}`,
+        );
+        const proc = spawn(command, args, {
           cwd,
           env: process.env,
           shell: isWindows(),

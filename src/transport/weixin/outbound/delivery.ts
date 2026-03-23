@@ -1,4 +1,4 @@
-import path from "node:path";
+﻿import path from "node:path";
 
 import {
   WEIXIN_BACKEND_LABELS,
@@ -142,6 +142,30 @@ export function createWeixinReplyErrorHandler(params: {
         notice = "⚠️ Codex 尚未完成登录，请先在网关工作目录手动执行一次 codex。";
       } else {
         notice = "⚠️ Codex 后端连接失败，请检查 codex-acp 和 codex 命令是否可用。";
+      }
+    } else if (info.kind === "opencode" || lowerErrMsg.includes("opencode")) {
+      if (lowerErrMsg.includes("requires authentication") || lowerErrMsg.includes("auth login")) {
+        notice = "⚠️ OpenCode 尚未完成登录，请先执行一次 opencode auth login，或在目标工作目录手动启动 opencode 完成初始化。";
+      } else {
+        notice = "⚠️ OpenCode 后端连接失败，请检查 opencode 命令是否可用。";
+      }
+    } else if (info.kind === "copilot" || lowerErrMsg.includes("copilot")) {
+      if (lowerErrMsg.includes("requires authentication") || lowerErrMsg.includes("login")) {
+        notice = "⚠️ GitHub Copilot 尚未完成登录，请先执行一次 copilot login，或配置 GH_TOKEN/GITHUB_TOKEN。";
+      } else {
+        notice = "⚠️ GitHub Copilot 后端连接失败，请检查 copilot 命令是否可用。";
+      }
+    } else if (info.kind === "auggie" || lowerErrMsg.includes("auggie")) {
+      if (lowerErrMsg.includes("requires authentication") || lowerErrMsg.includes("login")) {
+        notice = "⚠️ Auggie 尚未完成登录，请先执行一次 auggie login。";
+      } else {
+        notice = "⚠️ Auggie 后端连接失败，请检查 auggie 命令是否可用。";
+      }
+    } else if (info.kind === "cursor" || lowerErrMsg.includes("cursor")) {
+      if (lowerErrMsg.includes("requires authentication") || lowerErrMsg.includes("login")) {
+        notice = "⚠️ Cursor CLI 尚未完成登录，请先执行一次 cursor-agent login，或设置 CURSOR_API_KEY。";
+      } else {
+        notice = "⚠️ Cursor CLI 后端连接失败，请检查 cursor-agent 或 agent 命令是否可用。";
       }
     } else if (isKnownBackend && info.kind !== "openclaw") {
       const backendLabel = isKnownBackend ? WEIXIN_BACKEND_LABELS[info.kind] : "Agent";

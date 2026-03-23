@@ -1,4 +1,4 @@
-import path from "node:path";
+﻿import path from "node:path";
 
 import {
   resolvePreferredOpenClawTmpDir,
@@ -241,7 +241,10 @@ export async function processOneMessage(
       const output = await backendAdapter.reply(
         lightweightInput,
       );
-      await lightweightReplyBudgeter.finish(output?.text);
+      const finalText = output && typeof output === "object" && "text" in output
+        ? output.text
+        : undefined;
+      await lightweightReplyBudgeter.finish(finalText);
       return;
     }
 

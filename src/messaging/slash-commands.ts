@@ -82,8 +82,7 @@ function formatBackendStatus(ctx: SlashCommandContext): string {
     `当前后端: ${label}`,
     isDefault ? "来源: 默认" : "来源: 会话选择",
     `默认后端: ${WEIXIN_BACKEND_LABELS.openclaw}`,
-    `当前可用后端: ${WEIXIN_BACKEND_LABELS.openclaw}、${WEIXIN_BACKEND_LABELS.codex}、${WEIXIN_BACKEND_LABELS.claude}`,
-    `预留后端: ${WEIXIN_BACKEND_LABELS.opencode}、${WEIXIN_BACKEND_LABELS.copilot}、${WEIXIN_BACKEND_LABELS.auggie}、${WEIXIN_BACKEND_LABELS.cursor}`,
+    `当前可用后端: ${WEIXIN_BACKEND_LABELS.openclaw}、${WEIXIN_BACKEND_LABELS.codex}、${WEIXIN_BACKEND_LABELS.claude}、${WEIXIN_BACKEND_LABELS.opencode}、${WEIXIN_BACKEND_LABELS.copilot}、${WEIXIN_BACKEND_LABELS.auggie}、${WEIXIN_BACKEND_LABELS.cursor}`,
   ].join("\n");
 }
 
@@ -98,7 +97,7 @@ async function handleBackendCommand(ctx: SlashCommandContext, args: string): Pro
       ctx,
       [
         `未知后端: ${args.trim()}`,
-        `当前支持: openclaw / codex / claude`,
+        `当前支持: openclaw / codex / claude / opencode / copilot / auggie / cursor`,
       ].join("\n"),
     );
     return;
@@ -168,16 +167,20 @@ export async function handleSlashCommand(
         await sendReply(ctx, `已切换到 ${WEIXIN_BACKEND_LABELS.claude} 后端。`);
         return { handled: true };
       case "/opencode":
-        await sendReply(ctx, `${WEIXIN_BACKEND_LABELS.opencode} 后端尚未接入。`);
+        setBackendSelection(ctx.accountId, ctx.to, "opencode");
+        await sendReply(ctx, `已切换到 ${WEIXIN_BACKEND_LABELS.opencode} 后端。`);
         return { handled: true };
       case "/copilot":
-        await sendReply(ctx, `${WEIXIN_BACKEND_LABELS.copilot} 后端尚未接入。`);
+        setBackendSelection(ctx.accountId, ctx.to, "copilot");
+        await sendReply(ctx, `已切换到 ${WEIXIN_BACKEND_LABELS.copilot} 后端。`);
         return { handled: true };
       case "/auggie":
-        await sendReply(ctx, `${WEIXIN_BACKEND_LABELS.auggie} 后端尚未接入。`);
+        setBackendSelection(ctx.accountId, ctx.to, "auggie");
+        await sendReply(ctx, `已切换到 ${WEIXIN_BACKEND_LABELS.auggie} 后端。`);
         return { handled: true };
       case "/cursor":
-        await sendReply(ctx, `${WEIXIN_BACKEND_LABELS.cursor} 后端尚未接入。`);
+        setBackendSelection(ctx.accountId, ctx.to, "cursor");
+        await sendReply(ctx, `已切换到 ${WEIXIN_BACKEND_LABELS.cursor} 后端。`);
         return { handled: true };
       default:
         return { handled: false };

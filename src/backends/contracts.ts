@@ -14,6 +14,10 @@ export const IMPLEMENTED_WEIXIN_BACKEND_IDS = [
   DEFAULT_WEIXIN_BACKEND_ID,
   "codex",
   "claude",
+  "opencode",
+  "copilot",
+  "auggie",
+  "cursor",
 ] as const;
 
 export type WeixinBackendId = (typeof WEIXIN_BACKEND_IDS)[number];
@@ -94,6 +98,8 @@ export function normalizeWeixinBackendId(raw: string): WeixinBackendId | undefin
   const trimmed = raw.trim().toLowerCase();
   if (!trimmed) return undefined;
   if (trimmed === "claude-code") return "claude";
+  if (trimmed === "open-code" || trimmed === "opencode-ai") return "opencode";
+  if (trimmed === "augment") return "auggie";
   if (trimmed === "github-copilot" || trimmed === "copilot-cli") return "copilot";
   if (trimmed === "cursor-cli" || trimmed === "cursor-agent") return "cursor";
   return isWeixinBackendId(trimmed) ? trimmed : undefined;
